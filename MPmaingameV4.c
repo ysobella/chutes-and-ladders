@@ -3,6 +3,107 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <Windows.h>
+
+void gotoxy(int x,int y) 
+{ 
+    COORD coord={0,0}; 
+  	coord.X=x; 
+ 	coord.Y=y; 
+ 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord); 
+} 
+
+void yellow() // player 1 color
+{
+    printf("\033[0;33m");
+}
+
+void cyan() // player 2 color
+{
+    printf("\033[0;36m");
+}
+
+void green() // player 3 color
+{
+    printf("\033[0;32m");
+}
+
+void red() // player 4 color
+{
+    printf("\033[1;31m");
+}
+
+void purple()
+{
+    printf("\033[0;35m");
+}
+
+void reset() // reset color
+{
+    printf("\033[0m");
+}
+
+void clrscr()
+{
+    system("cls||clear");
+}
+
+void intro()
+{
+    char c;
+    yellow();
+    gotoxy(42, 1);
+    printf("=====================================\n");
+    cyan();
+    gotoxy(43, 2);
+    printf("C H U T E S   A N D   L A D D E R S\n");
+    green();
+    gotoxy(51, 3);
+    printf("by : Ysobella Torio\n");
+    red();
+    gotoxy(58, 4);
+    printf("S11-B\n");
+    yellow();
+    gotoxy(42, 5);
+    printf("=====================================\n\n");
+    reset();
+
+    printf("Read the [M]echanics or [S]tart the game? ");
+    scanf(" %c", &c);
+    c = tolower(c);
+
+    while(c != 'm' && c != 's')
+    {
+        printf("Invalid Input. Please try again.\n");
+        scanf(" %c", &c);
+        c = tolower(c);
+    }
+
+    if(c == 'm')
+    {
+        yellow();
+        gotoxy(56, 9);
+        printf("MECHANICS\n");
+        reset();
+        printf("1. The game can be played by 2-4 human players, but you can also choose to play with pseudo-AI players.\n");
+        printf("2. If a 6 is rolled in the virtual die, the same player will get to roll the die again.\n");
+        printf("3. Players take turns rolling a single die to move their token by the number of squares indicated by the die rolled.\n");
+        printf("4. When a player's token lands on the bottom of a ladder, the player moves up to the upper part of the ladder. \n");
+        printf("5. If the player lands on the upper part of a chute, the token must be moved down to the bottom of the chute. \n");
+        printf("6. The first player who brings their token to the last square of the track wins the game. \n\n");
+        printf("Press ENTER to continue...\n");
+        c = getchar();
+        c = getchar();
+        sleep(1);
+        clrscr();
+    }
+    else
+    {
+        c = getchar();
+        clrscr();
+    }
+}
 
 int random()
 {
@@ -24,12 +125,10 @@ void rollDice()
     do // press D to roll the die
     {
         printf("Press D to roll the die.\n");
-        cDiceKey = getchar();
+        // cDiceKey = getchar();
         scanf(" %c", &cDiceKey);
         cDiceKey = tolower(cDiceKey);
-
     } while (cDiceKey != 'd');
-
 }
 
 int playerCount()
@@ -101,17 +200,100 @@ int candl(int nScore)
     return nScore;
 }
 
+void board(int nP1, int nP2, int nP3, int nP4)
+{
+    int nRow, nCol;
+    int nNum = 111;
+
+    for(nRow = 10; nRow >= 1; nRow--)
+    {
+        if (nNum > 0)
+        {
+            if (nRow % 2 == 0)
+            {
+                nNum -= 11;
+                 for (nCol = 10; nCol >= 1; nCol--)
+                {
+                    if(nNum == nP1)
+                    {
+                        yellow();
+                        printf("[P1]\t");
+                        reset();
+                    }
+                    else if(nNum == nP2)
+                    {
+                        cyan();
+                        printf("[P2]\t");
+                        reset();
+                    }
+                    else if(nNum == nP3)
+                    {
+                        green();
+                        printf("[P3]\t");
+                        reset();
+                    }
+                    else if(nNum == nP4)
+                    {
+                        red();
+                        printf("[P4]\t");
+                        reset();
+                    }
+                    else
+                    {
+                        printf("[%d]\t", nNum);
+                    }
+                    nNum--;
+                }
+            }
+            else
+            {
+                nNum -= 9;
+                for (nCol = 10; nCol >= 1; nCol--)
+                {   
+                    if(nNum == nP1)
+                    {
+                        yellow();
+                        printf("[P1]\t");
+                        reset();
+                    }
+                    else if(nNum == nP2)
+                    {
+                        cyan();
+                        printf("[P2]\t");
+                        reset();
+                    }
+                    else if(nNum == nP3)
+                    {
+                        green();
+                        printf("[P3]\t");
+                        reset();
+                    }
+                    else if(nNum == nP4)
+                    {
+                        red();
+                        printf("[P4]\t");
+                        reset();
+                    }
+                    else
+                    {
+                        printf("[%d]\t", nNum);
+                    }
+                    nNum++;
+                }
+                    
+            }
+            printf("\n");
+        }
+    }
+}
+
 void game (int *nPos, int nAI, bool bP1Turn)
 {
     if (nAI == 0 || bP1Turn == true)
     {
         rollDice();
     }
-    else
-    {
-        char c = getchar();
-    }
-
+    
     int nDice = random();
     *nPos = *nPos + nDice; 
     // score exceeds 100
@@ -135,7 +317,6 @@ void game (int *nPos, int nAI, bool bP1Turn)
             
     *nPos = nCandl;
             
-
     // rolling the die again (6)
     while (nDice == 6 && *nPos != 100) 
     {
@@ -149,6 +330,7 @@ void game (int *nPos, int nAI, bool bP1Turn)
         else
         {
             char c = getchar();
+            sleep(1);
         }
 
         nDice = random();
@@ -174,134 +356,217 @@ void game (int *nPos, int nAI, bool bP1Turn)
             printf("You landed on a chute! Going down to %d\n", nCandl);
         }
                 
-        *nPos = nCandl;
-            
+        *nPos = nCandl;        
     }
 }
 
 void mainGame(int nP1, int nP2, int nP3, int nP4, int nPC, int nAI) // recursive
 {
     bool bP1Turn, bP2Turn, bP3Turn, bP4Turn; // player turn
+    bool bWin = false;
 
     bP1Turn = true;
 
-    // ----- PLAYER 1 ------
-    if (bP1Turn == true)
+    do 
     {
-        printf("\n\n\nP L A Y E R  1\n");
+        // ----- PLAYER 1 ------
+        if (bP1Turn == true)
+        {   
+            board(nP1, nP2, nP3, nP4);
+            yellow();
+            printf("\n\n= = = P L A Y E R  1 = = =\n");
+            reset();
 
-        game (&nP1, nAI, bP1Turn);
+            game (&nP1, nAI, bP1Turn);
 
-        if (nP1 == 100)
-        {
-            bP1Turn = false;
-            printf("\n\nCongratulations Player 1! You won the game!\n\n");
-            return;
-        }
-        else
-        {
-            bP1Turn = false;
-            bP2Turn = true;
-        }
-    }
+            printf("Press ENTER to continue...\n");
+            char c = getchar();
+            c = getchar();
+            sleep(1);
+            clrscr();
 
-    // ----- PLAYER 2 ------
-    if (bP2Turn == true)
-    {
-        printf("\n\n\nP L A Y E R  2\n");
-
-        game (&nP2,  nAI, bP1Turn);
-
-        if (nP2 == 100)
-        {
-            bP1Turn = false;
-            bP2Turn = false;
-            bP3Turn = false;
-            bP4Turn = false;
-            printf("\n\nCongratulations Player 2! You won the game!\n\n");
-            return;
-        }
-        else
-        {
-            if (nPC > 1)
+            if (nP1 == 100)
             {
-                bP2Turn = false;
-                bP3Turn = true;
+                bP1Turn = false;
+                board(nP1, nP2, nP3, nP4);
+                yellow();
+                printf("\n\nCongratulations Player 1!\n");
+                cyan();
+                printf("You won the game!\n\n");
+                reset();
+                bWin == true;
             }
             else
             {
+                bP1Turn = false;
+                bP2Turn = true;
+            }    
+        }
+
+        // ----- PLAYER 2 ------
+        if (bP2Turn == true)
+        {
+            board(nP1, nP2, nP3, nP4);
+            cyan();
+            printf("\n\n= = = P L A Y E R  2 = = =\n");
+            reset();
+
+            game (&nP2, nAI, bP1Turn);
+
+            printf("Press ENTER to continue...\n");
+            char c = getchar();
+            if (nAI == 0) // double getchar for human players
+            {
+                c = getchar();
+            }
+            sleep(1);
+            clrscr();
+
+            if (nP2 == 100)
+            {
+                bP1Turn = false;
                 bP2Turn = false;
+                bP3Turn = false;
+                bP4Turn = false;
+                board(nP1, nP2, nP3, nP4);
+                yellow();
+                printf("\n\nCongratulations Player 2!\n");
+                cyan();
+                printf("You won the game!\n\n");
+                reset();
+                bWin == true;
+            }
+            else
+            {
+                if (nPC > 1)
+                {
+                    bP2Turn = false;
+                    bP3Turn = true;
+                }
+                else
+                {
+                    bP2Turn = false;
+                    mainGame(nP1, nP2, nP3, nP4, nPC, nAI);
+                }
+            }
+        }
+
+        // ----- PLAYER 3 ------
+        if (bP3Turn == true)
+        {
+            board(nP1, nP2, nP3, nP4);
+            green();
+            printf("\n\n= = = P L A Y E R  3 = = =\n");
+            reset();
+
+            game (&nP3, nAI, bP1Turn);
+
+            printf("Press ENTER to continue...\n");
+            char c = getchar();
+            if (nAI == 0)
+            {
+                c = getchar();
+            }
+            sleep(1);
+            clrscr();
+
+            if (nP3 == 100)
+            {
+                bP1Turn = false;
+                bP2Turn = false;
+                bP3Turn = false;
+                bP4Turn = false;
+                board(nP1, nP2, nP3, nP4);
+                yellow();
+                printf("\n\nCongratulations Player 3!\n");
+                cyan();
+                printf("You won the game!\n\n");
+                reset();
+                bWin == true;
+            }
+            else
+            {
+                if (nPC > 2)
+                {
+                    bP4Turn = true;
+                    bP3Turn = false;
+                }
+                else
+                {
+                    bP3Turn = false;
+                    mainGame(nP1, nP2, nP3, nP4, nPC, nAI);
+                }
+            }
+        }
+
+        // ----- PLAYER 4 ------
+        if (bP4Turn == true)
+        {
+            board(nP1, nP2, nP3, nP4);
+            red();
+            printf("\n\n= = = P L A Y E R  4 = = =\n");
+            reset();
+
+            game (&nP4, nAI, bP1Turn);
+
+            printf("Press ENTER to continue...\n");
+            char c = getchar();
+            if (nAI == 0)
+            {
+                c = getchar();
+            }
+            sleep(1);
+            clrscr();
+
+            if (nP4 == 100)
+            {
+                bP1Turn = false;
+                bP2Turn = false;
+                bP3Turn = false;
+                bP4Turn = false;
+                board(nP1, nP2, nP3, nP4);
+                yellow();
+                printf("\n\nCongratulations Player 4!\n");
+                cyan();
+                printf("You won the game!\n\n");
+                reset();
+                bWin == true;        
+            }
+            else
+            {
+                bP4Turn = false;
                 mainGame(nP1, nP2, nP3, nP4, nPC, nAI);
             }
         }
 
-    }
+    } while (bWin == false);
+}
 
-    // ----- PLAYER 3 ------
-    if (bP3Turn == true)
-    {
-        printf("\n\n\nP L A Y E R  3\n");
-
-        game (&nP3, nAI, bP1Turn);
-
-        if (nP3 == 100)
-        {
-            bP1Turn = false;
-            bP2Turn = false;
-            bP3Turn = false;
-            bP4Turn = false;
-            printf("\n\nCongratulations Player 3! You won the game!\n\n");
-            return;
-        }
-        else
-        {
-            if (nPC > 2)
-            {
-                bP4Turn = true;
-                bP3Turn = false;
-            }
-            else
-            {
-                bP3Turn = false;
-                mainGame(nP1, nP2, nP3, nP4, nPC, nAI);
-            }
-        }
-
-    }
-
-    // ----- PLAYER 4 ------
-    if (bP4Turn == true)
-    {
-        printf("\n\n\nP L A Y E R  4\n");
-
-        game (&nP4, nAI, bP1Turn);
-
-        if (nP4 == 100)
-        {
-            bP1Turn = false;
-            bP2Turn = false;
-            bP3Turn = false;
-            bP4Turn = false;
-            printf("\n\nCongratulations Player 4! You won the game!\n\n");
-            return;
-            
-        }
-        else
-        {
-            bP4Turn = false;
-            mainGame(nP1, nP2, nP3, nP4, nPC, nAI);
-        }
-
-    }
-
+void chutesAndLadders()
+{
+    cyan();
+    printf("LADDERS:                         CHUTES:\n");
+    reset();
+    printf("1 ---> 38                        17 ---> 3\n");
+    printf("4 ---> 14                        32 ---> 10\n");
+    printf("8 ---> 30                        36 ---> 6\n");
+    printf("21 ---> 42                       48 ---> 26\n");
+    printf("28 ---> 65                       62 ---> 18\n");
+    printf("50 ---> 67                       87 ---> 24\n");
+    printf("71 ---> 92                       95 ---> 56\n");
+    printf("88 ---> 100                      97 ---> 78\n\n");
+    printf("Press ENTER to continue...\n");
 }
 
 int main()
 {
+    char c;
+    intro();
+    chutesAndLadders();
+
     struct players // struct for player data
     {
         int nPos;
-        char *cName;
     } ;
 
     int nNum; // declaring variable of dice
@@ -310,11 +575,10 @@ int main()
     P2.nPos = 0;
     P3.nPos = 0;
     P4.nPos = 0;
-    
-    P1.cName = "Player 1";
-    P2.cName = "Player 2";
-    P3.cName = "Player 3";
-    P4.cName = "Player 4";
+
+    c = getchar();
+    sleep(1);
+    clrscr();
 
     int nPC = playerCount(); // getting return value of playerCount function
 
